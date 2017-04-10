@@ -46,6 +46,9 @@ Slider.prototype.getIndex = function()
 
 Slider.prototype.send_LED = function(){
 	val = this.value;
+
+	if(val > 127) { val = 127; } // Quick safety measure since the other faders work differently than the master. Avoids crashes.
+
 	sendMidi(176, this.CC, val)
 }
 

@@ -6,6 +6,8 @@ KMix_Mixer = function()
 	self.sliders = [];
 	self.rotaries = [];
 	self.track_select_buttons = [];
+	self.bypass_mode_button = new Button(BYPASS_BUTTON);
+	self.fine_mode_button = new Button(FINE_BUTTON);
 	self.VU_mode_button = new Button(VU_BUTTON);
 	self.master_fader = new Slider(MASTER_SLIDER);
 	self.master_select = new Button(MASTER_BUTTON);
@@ -38,7 +40,21 @@ KMix_Mixer = function()
 	}	
 	this.selected_track.getPan().addValueObserver(128, function(value){
 		self.rotaries[0].set_value(value)
-	})
+	});
+
+	// Setting up arm, mute, and solo on the right side of the K-Mix
+	this.selected_track.getArm().addValueObserver(function(value){
+		self.bypass_mode_button.set_value(value ? 1 : 0);
+	});
+	this.selected_track.getSolo().addValueObserver(function(value){
+		self.fine_mode_button.set_value(value ? 1 : 0);
+	});
+	this.selected_track.getMute().addValueObserver(function(value){
+		self.VU_mode_button.set_value(value ? 1 : 0);
+	});
+
+
+
 
 	for(y = 0; y < 3 ;y ++)
 	{
@@ -72,6 +88,7 @@ KMix_Mixer = function()
 
 KMix_Mixer.prototype.onMIDI = function (status,data1,data2)
 {
+
 	if(status == 176)
 	{
 		if(data1 > 0 && data1 < 9){
@@ -97,6 +114,15 @@ KMix_Mixer.prototype.onMIDI = function (status,data1,data2)
 			this.track_bank.scrollTracksUp();
 		}else if(data1 == this.bank_down.note){
 			this.track_bank.scrollTracksDown();
+		}
+		else if(data1 == this.bypass_mode_button.note) {
+			this.selected_track.getArm().toggle();
+		}
+		else if(data1 == this.fine_mode_button.note) {
+			this.selected_track.getSolo().toggle();
+		}
+		else if(data1 == this.VU_mode_button.note) {
+			this.selected_track.getMute().toggle();
 		}
 	}
 
